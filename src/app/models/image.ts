@@ -18,11 +18,4 @@ export class Imagem{
     valMax: number;
     pixels: Pixel[];
 
-    constructor(str: string, alt: number, lar: number, max: number){
-        this.tipo = str;
-        this.altura =  alt;
-        this.largura =  lar; 
-        this.valMax =  max;
-        this.pixels = [];
-    }
 }

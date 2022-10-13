@@ -1,0 +1,25 @@
+<canvas id='draw' #draw width='150' class='aspero'></canvas>
+<div class="flex">
+    <canvas matTooltip="canal vermelho" id='drawR' #drawR width='150' class='aspero'></canvas>
+    <canvas matTooltip="canal verde" id='drawG' #drawG width='150' class='aspero'></canvas>
+    <canvas matTooltip="canal azul" id='drawB' #drawB width='150' class='aspero'></canvas>
+</div>
+<div class="flex">
+    <div class="centerBox">
+        <h3>RGB</h3>
+        R = {{textoR}}<br>
+        G = {{textoG}}<br>
+        B = {{textoB}}
+    </div>
+    <div class="centerBox">
+        <h3>HSL</h3>
+        H = {{textoH}}<br>
+        S = {{textoS}}<br>
+        L = {{textoL}}
+    </div>
+    <div class="centerBox">
+        <h3>[X,Y]</h3>
+        X = {{textoX}}<br>
+        Y = {{textoY}}
+    </div>
+</div>

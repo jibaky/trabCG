@@ -5,11 +5,15 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './pages/home/home.component';
+import { ImageUploaderComponent } from './components/image-uploader/image-uploader.component';
+import { ImageVisualComponent } from './components/image-visual/image-visual.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent
+    HomeComponent,
+    ImageUploaderComponent,
+    ImageVisualComponent
   ],
   imports: [
     BrowserModule,
