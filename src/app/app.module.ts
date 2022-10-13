@@ -7,6 +7,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './pages/home/home.component';
 import { ImageUploaderComponent } from './components/image-uploader/image-uploader.component';
 import { ImageVisualComponent } from './components/image-visual/image-visual.component';
+import {MatButtonModule} from '@angular/material/button';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {MatIconModule} from '@angular/material/icon';
+
 
 @NgModule({
   declarations: [
@@ -18,7 +22,10 @@ import { ImageVisualComponent } from './components/image-visual/image-visual.com
   imports: [
     BrowserModule,
     AppRoutingModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    MatButtonModule,
+    MatButtonToggleModule,
+    MatIconModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

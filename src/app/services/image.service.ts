@@ -146,4 +146,19 @@ export class ImageService {
     }
     this.pictureStream.next(this.pic);
   }
+  public colorPoint(x, y){
+    let largura = this.pic.largura, cor = 0,index = y*largura+x
+    let media = (this.pic.pixels[index].r + this.pic.pixels[index].g + this.pic.pixels[index].b)/3
+    for(let i = -1; i<2; i++){
+      for(let j = -1; j<2; j++){
+        index = (y+i)*largura+(x+j)
+        if(this.pic.pixels[index] != undefined){
+          this.pic.pixels[index].r = cor
+          this.pic.pixels[index].g = cor
+          this.pic.pixels[index].b = cor
+        }
+      }
+    }
+    this.pictureStream.next(this.pic);
+  }
 }

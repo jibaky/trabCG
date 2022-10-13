@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { filter } from 'rxjs';
 import { Imagem } from 'src/app/models/image';
+import { DrawService } from 'src/app/services/draw.service';
 import { ImageService } from 'src/app/services/image.service';
 
 @Component({
@@ -10,10 +11,10 @@ import { ImageService } from 'src/app/services/image.service';
 })
 export class ImageUploaderComponent implements OnInit {
 
-  constructor(private imageService: ImageService) { }
+  constructor(public imageService: ImageService, public drawService: DrawService) { }
 
   @ViewChild('draw') myCanvas: ElementRef;
-  
+
   ngOnInit(): void {
   }
   onChange(arq: File): void{

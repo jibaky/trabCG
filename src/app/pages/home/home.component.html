@@ -1,3 +1,13 @@
-<p>home works!</p>
+<mat-button-toggle-group #group="matButtonToggleGroup" (change)="drawService.currentTool = group.value">
+    <mat-button-toggle value="0" aria-label="Text align left">
+      <mat-icon class="outlined">edit</mat-icon>
+    </mat-button-toggle>
+    <mat-button-toggle value="1" aria-label="Text align center">
+      <mat-icon class="outlined">horizontal_rule</mat-icon>
+    </mat-button-toggle>
+    <mat-button-toggle value="2" aria-label="Text align right">
+      <mat-icon class="outlined">circle</mat-icon>
+    </mat-button-toggle>
+</mat-button-toggle-group>
 <app-image-uploader></app-image-uploader>
 <app-image-visual></app-image-visual>

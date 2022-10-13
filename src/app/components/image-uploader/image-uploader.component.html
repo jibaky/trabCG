@@ -1,2 +1,3 @@
 <canvas id='draw' #draw width='150' class='aspero'></canvas><br>
-<input type='file' class='fileInput' name='file' (change)='onChange(fileInput.files[0])' #fileInput>
+<input type='file' class='oculto' name='file' (change)='onChange(fileInput.files[0])' display="none" #fileInput>
+<button (click)="fileInput.value = '';fileInput.click()" mat-raised-button color="primary"> Abrir Arquivo </button>

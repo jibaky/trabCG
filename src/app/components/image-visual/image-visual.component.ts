@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { filter } from 'rxjs';
 import { Imagem } from 'src/app/models/image';
+import { DrawService } from 'src/app/services/draw.service';
 import { ImageService } from 'src/app/services/image.service';
 
 @Component({
@@ -23,7 +24,7 @@ export class ImageVisualComponent implements OnInit {
   textoX: any = 0;
   textoY: any = 0;
 
-  constructor(private imageService: ImageService) { }
+  constructor(public imageService: ImageService, public drawService: DrawService) { }
 
   ngOnInit(): void {
   }
@@ -75,5 +76,8 @@ export class ImageVisualComponent implements OnInit {
     this.myCanvas.nativeElement.addEventListener("mousemove", (e)=>{
       if(this.imageService.isLoaded) this.getMousePosition(e);
       })
+  }
+  drawExtra(){
+    this.drawService.draw(this.textoX, this.textoY);
   }
 }
