@@ -10,7 +10,7 @@ import { ImageService } from 'src/app/services/image.service';
 export class HomeComponent implements OnInit {
 
   constructor(public imageService: ImageService, public drawService: DrawService) { }
-  
+
   ngOnInit(): void {
   }
 

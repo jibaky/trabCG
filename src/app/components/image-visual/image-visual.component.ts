@@ -15,6 +15,7 @@ export class ImageVisualComponent implements OnInit {
   @ViewChild('drawR') myCanvasR: ElementRef;
   @ViewChild('drawG') myCanvasG: ElementRef;
   @ViewChild('drawB') myCanvasB: ElementRef;
+  primCoord = []
   textoR: any = 0;
   textoG: any = 0;
   textoB: any = 0;
@@ -75,9 +76,21 @@ export class ImageVisualComponent implements OnInit {
     });
     this.myCanvas.nativeElement.addEventListener("mousemove", (e)=>{
       if(this.imageService.isLoaded) this.getMousePosition(e);
-      })
+    })
+    this.myCanvas.nativeElement.addEventListener("mousedown", (e)=>{
+      if(this.imageService.isLoaded){
+        if(this.drawService.currentTool == 0) this.drawExtra();
+        else this.defPrimCoord();
+      }
+    })
+    this.myCanvas.nativeElement.addEventListener("mouseup", (e)=>{
+      if(this.imageService.isLoaded) this.drawExtra();
+    })
+  }
+  defPrimCoord(){
+    this.primCoord = [this.textoX, this.textoY];
   }
   drawExtra(){
-    this.drawService.draw(this.textoX, this.textoY);
+    this.drawService.draw([this.primCoord[0], this.textoX], [this.primCoord[1], this.textoY]);
   }
 }

@@ -1,3 +1,7 @@
+<input id="R" size="1" [(value)]="tR" #textR>
+<input id="G" size="1" [(value)]="tG" #textG>
+<input id="B" size="1" [(value)]="tB" #textB>
+<button mat-raised-button color="primary" (click)="createNewPic(textR.value,textG.value,textB.value)">nova Imagem</button>
 <canvas id='draw' #draw width='150' class='aspero'></canvas><br>
 <input type='file' class='oculto' name='file' (change)='onChange(fileInput.files[0])' display="none" #fileInput>
 <button (click)="fileInput.value = '';fileInput.click()" mat-raised-button color="primary"> Abrir Arquivo </button>

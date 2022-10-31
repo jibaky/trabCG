@@ -7,7 +7,7 @@ import { Imagem, Pixel } from '../models/image';
 })
 export class ImageService {
   public isLoaded: boolean = false;
-  private hue = [];
+  public cor = 0
   private pic: Imagem = new Imagem();
   /** observable da imagem original */
   public originalStream = new BehaviorSubject(null);
@@ -50,6 +50,31 @@ export class ImageService {
       leitor.readAsText(arquivo);
 
     });
+  }
+  createImage(r: number, g: number, b: number){
+    if(r==g && r==b) this.pic.tipo = "P2"
+    else this.pic.tipo = "P3"
+    let inicioPixels = 3;
+    this.pic.largura = 32;
+    this.pic.altura = 32;
+    this.pic.valMax = 256;
+    let tam = this.pic.largura * this.pic.altura;
+    if(this.pic.tipo == 'P2') {
+      let arrDados = Array(tam).fill(r)
+      this.pic.pixels = this.loadPGM(arrDados, 0);
+    }
+    if(this.pic.tipo == 'P3') {
+      let arrDados = []
+      for (let i = 0; i < tam; i++) {
+        arrDados.push(r);
+        arrDados.push(g);
+        arrDados.push(b);
+      }
+      this.pic.pixels = this.loadPPM(arrDados, 0);
+    }
+    this.originalStream.next(this.pic);
+    this.pictureStream.next(this.pic);
+    this.isLoaded = true;
   }
   private loadPGM(dados: Array<String>, offset: number): Pixel[]{
     const pixels=[];
@@ -147,16 +172,57 @@ export class ImageService {
     this.pictureStream.next(this.pic);
   }
   public colorPoint(x, y){
-    let largura = this.pic.largura, cor = 0,index = y*largura+x
-    let media = (this.pic.pixels[index].r + this.pic.pixels[index].g + this.pic.pixels[index].b)/3
-    for(let i = -1; i<2; i++){
-      for(let j = -1; j<2; j++){
-        index = (y+i)*largura+(x+j)
-        if(this.pic.pixels[index] != undefined){
-          this.pic.pixels[index].r = cor
-          this.pic.pixels[index].g = cor
-          this.pic.pixels[index].b = cor
-        }
+    let largura = this.pic.largura,index = y*largura+x
+    index = y*largura+x
+    if(this.pic.pixels[index] != undefined){
+      this.pic.pixels[index].r = this.cor
+      this.pic.pixels[index].g = this.cor
+      this.pic.pixels[index].b = this.cor
+    }
+    this.pictureStream.next(this.pic);
+  }
+  public drawLinePar(arrX: number[], arrY: number[]){
+    const largura = this.pic.largura, vX = arrX[1]-arrX[0], vY = arrY[1]-arrY[0];
+    for(let t = 0; t<1; t+=0.01){
+      const x = Math.floor(arrX[0]+vX*t), y = Math.floor(arrY[0]+vY*t);
+      const index = y*largura+x;
+      this.pic.pixels[index].r = this.cor;
+      this.pic.pixels[index].g = this.cor;
+      this.pic.pixels[index].b = this.cor;
+    }
+    this.pictureStream.next(this.pic);
+  }
+  public drawCircleEq(arrX: number[], arrY: number[]){ 
+    const rad = Math.abs(arrX[0]-arrX[1]);
+    const largura = this.pic.largura;
+    for(let x = -rad; x<rad; x+=1){
+      const y = Math.floor(Math.sqrt(rad*rad - x*x));
+      let index = (arrY[0]+y)*largura+(arrX[0]+x);
+      if(this.pic.pixels[index] != undefined){
+        this.pic.pixels[index].r = this.cor;
+        this.pic.pixels[index].g = this.cor;
+        this.pic.pixels[index].b = this.cor;
+      }
+      index = (arrY[0]-y)*largura+(arrX[0]+x);
+      if(this.pic.pixels[index] != undefined){
+        this.pic.pixels[index].r = this.cor;
+        this.pic.pixels[index].g = this.cor;
+        this.pic.pixels[index].b = this.cor;
+      }
+    }
+    this.pictureStream.next(this.pic);
+  }
+  public drawCirclePar(arrX: number[], arrY: number[]){
+    this.colorPoint(arrX[0], arrY[0])
+    const pi = 3.14, rad = Math.abs(arrX[0]-arrX[1]), largura = this.pic.largura;
+    for(let a = 0; a<2*pi; a+=0.01){
+      let x = Math.round(rad * Math.cos(a));
+      let y = Math.round(rad * Math.sin(a));
+      let index = (arrY[0]+y)*largura+(arrX[0]+x);
+      if(this.pic.pixels[index] != undefined){
+        this.pic.pixels[index].r = this.cor;
+        this.pic.pixels[index].g = this.cor;
+        this.pic.pixels[index].b = this.cor;
       }
     }
     this.pictureStream.next(this.pic);

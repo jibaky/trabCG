@@ -10,13 +10,14 @@ export class DrawService {
 
   public currentTool = 0;
   
-  draw(x:number, y:number){
+  draw(arrX = [], arrY = []){
     if(this.currentTool == 0){
-      this.imageService.colorPoint(x,y);
+      this.imageService.colorPoint(arrX[1],arrY[1]);
     }else if(this.currentTool == 1){
-      console.log('1')
+      this.imageService.drawLinePar(arrX, arrY);
     }else if(this.currentTool == 2){
-      console.log('2')
+      // this.imageService.drawCircleEq(arrX, arrY);
+      this.imageService.drawCirclePar(arrX, arrY);
     }
   }
 

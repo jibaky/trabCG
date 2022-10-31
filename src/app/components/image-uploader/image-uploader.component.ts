@@ -12,7 +12,10 @@ import { ImageService } from 'src/app/services/image.service';
 export class ImageUploaderComponent implements OnInit {
 
   constructor(public imageService: ImageService, public drawService: DrawService) { }
-
+  
+  tR: any = 150;
+  tG: any = 150;
+  tB: any = 150;
   @ViewChild('draw') myCanvas: ElementRef;
 
   ngOnInit(): void {
@@ -37,5 +40,17 @@ export class ImageUploaderComponent implements OnInit {
     ).subscribe((updatedPicture: Imagem)=>{
       this.drawOnCanvas(updatedPicture);
     });
+  }
+  createNewPic(r:string, g:string, b:string): void{
+    let nR = Number(r), nG = Number(g), nB = Number(b);
+    if(nR>255 || nG>255 || nB>255){
+      alert("as cores RGB só vão até 255");
+      return;
+    }
+    if(nR<0 || nG<0 || nB<0){
+      alert("os valores do RGB devem ser positivos");
+      return;
+    }
+    this.imageService.createImage(nR,nG,nB);
   }
 }
