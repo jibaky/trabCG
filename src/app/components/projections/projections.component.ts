@@ -111,10 +111,22 @@ export class ProjectionsComponent implements OnInit {
     else if (this.mode === 'mode-translation') t = this.getTranslateMatrix();
     else if (this.mode === 'mode-rotation-origin')
       t = this.getRotationOriginMatrix();
-    else if (this.mode === 'mode-rotation-center')
-      t = this.getRotationCenterMatrix();
+    else if (this.mode === 'mode-shearing') t = this.getShearingMatrix();
+    else if (this.mode === 'mode-rotation-center') {
+      this.getRotationCenterMatrix();
+      this.render();
+      return;
+    }
     console.table(t);
 
+    this.apply(t);
+
+    console.log(this.casa);
+
+    this.render();
+  }
+
+  apply(t: number[][]): void {
     this.casa.lines = this.casa.lines.map((line: Line3D) => {
       const newStart = new Coord3DHomogenea(0, 0, 0, 0);
       const newEnd = new Coord3DHomogenea(0, 0, 0, 0);
@@ -166,10 +178,6 @@ export class ProjectionsComponent implements OnInit {
         newEnd.normalize().toCoord3D()
       );
     });
-
-    console.log(this.casa);
-
-    this.render();
   }
 
   getLocalScaleMatrix(): number[][] {
@@ -221,6 +229,7 @@ export class ProjectionsComponent implements OnInit {
     ];
 
     const teta = this.rotationDegrees * (Math.PI / 180);
+    console.log('teta rads:', teta);
     const cosTeta = Math.cos(teta);
     const sinTeta = Math.sin(teta);
 
@@ -244,7 +253,7 @@ export class ProjectionsComponent implements OnInit {
     return t;
   }
 
-  getRotationCenterMatrix(): number[][] {
+  getRotationCenterMatrix(): void {
     const t = [
       [1, 0, 0, 0],
       [0, 1, 0, 0],
@@ -274,42 +283,58 @@ export class ProjectionsComponent implements OnInit {
       if (miz < minZ) minZ = miz;
     }
 
-    const deltaX = maxX - minX;
-    const deltaY = maxY - minY;
-    const deltaZ = maxZ - minZ;
+    let deltaX = maxX - minX;
+    let deltaY = maxY - minY;
+    let deltaZ = maxZ - minZ;
 
-    const center3D = new Coord3D(deltaX, deltaY, deltaZ);
-    t[3][0] = -center3D.x / 2;
-    t[3][1] = -center3D.y / 2;
-    t[3][2] = -center3D.z / 2;
+    const center3D = new Coord3D(deltaX / 2, deltaY / 2, deltaZ / 2);
+    t[3][0] = -center3D.x;
+    t[3][1] = center3D.y;
+    t[3][2] = -center3D.z;
+
+    this.apply(t);
 
     const tRotacao = this.getRotationOriginMatrix();
+
+    this.apply(tRotacao);
+
+    minX = this.casa.lines[0].start.x;
+    maxX = 0;
+    minY = this.casa.lines[0].start.y;
+    maxY = 0;
+    minZ = this.casa.lines[0].start.z;
+    maxZ = 0;
+    for (const line of this.casa.lines) {
+      const mx = Math.max(line.start.x, line.end.x);
+      if (mx > maxX) maxX = mx;
+      const my = Math.max(line.start.y, line.end.y);
+      if (my > maxY) maxY = my;
+      const mz = Math.max(line.start.z, line.end.z);
+      if (mz > maxZ) maxZ = mz;
+
+      const mix = Math.min(line.start.x, line.end.x);
+      if (mix < minX) minX = mix;
+      const miy = Math.min(line.start.y, line.end.y);
+      if (miy < minY) minY = miy;
+      const miz = Math.min(line.start.z, line.end.z);
+      if (miz < minZ) minZ = miz;
+    }
+
+    deltaX = maxX - minX;
+    deltaY = maxY - minY;
+    deltaZ = maxZ - minZ;
 
     const tRerversa = [
       [1, 0, 0, 0],
       [0, 1, 0, 0],
       [0, 0, 1, 0],
-      [center3D.x / 2, center3D.y / 2, center3D.z / 2, 1],
+      [deltaX / 2, -(deltaY / 2), deltaZ / 2, 1],
     ];
 
-    const tParcial = JSON.parse(JSON.stringify(t));
-    console.table(tParcial);
+    this.apply(tRerversa);
+  }
 
-    for (const newSource of [tRotacao, tRerversa]) {
-      for (let i = 0; i < tParcial.length; i++) {
-        for (let j = 0; j < tParcial[i].length; j++) {
-          let newValue = 0;
-          for (let k = 0; k < tParcial.length; k++) {
-            newValue += tParcial[i][k] * newSource[k][j];
-          }
-          tParcial[i][j] = newValue;
-        }
-        //console.log('PUTA MERDA', newValue);
-      }
-    }
-
-    console.log(tParcial);
-
-    return tParcial;
+  getShearingMatrix(): number[][] {
+    return this.transformationMatrix;
   }
 }
