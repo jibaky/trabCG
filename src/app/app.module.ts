@@ -7,17 +7,19 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './pages/home/home.component';
 import { ImageUploaderComponent } from './components/image-uploader/image-uploader.component';
 import { ImageVisualComponent } from './components/image-visual/image-visual.component';
-import {MatButtonModule} from '@angular/material/button';
-import {MatButtonToggleModule} from '@angular/material/button-toggle';
-import {MatIconModule} from '@angular/material/icon';
-
+import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatIconModule } from '@angular/material/icon';
+import { ProjectionsComponent } from './components/projections/projections.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
     ImageUploaderComponent,
-    ImageVisualComponent
+    ImageVisualComponent,
+    ProjectionsComponent,
   ],
   imports: [
     BrowserModule,
@@ -26,8 +28,9 @@ import {MatIconModule} from '@angular/material/icon';
     MatButtonModule,
     MatButtonToggleModule,
     MatIconModule,
+    FormsModule,
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
