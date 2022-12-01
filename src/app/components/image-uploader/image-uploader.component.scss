@@ -1,6 +1,6 @@
-:host{
-    text-align: center;
-}
+// :host{
+//     text-align: center;
+// }
 .aspero{
     image-rendering: pixelated;
 }
@@ -9,4 +9,8 @@
 }
 .oculto {
     display: none;
+}
+.flex{
+    display: flex;
+    flex-direction: row;
 }

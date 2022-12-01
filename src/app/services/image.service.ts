@@ -7,7 +7,7 @@ import { Imagem, Pixel } from '../models/image';
 })
 export class ImageService {
   public isLoaded: boolean = false;
-  public cor = 0
+  public cor = [0,0,0];
   private pic: Imagem = new Imagem();
   /** observable da imagem original */
   public originalStream = new BehaviorSubject(null);
@@ -51,14 +51,13 @@ export class ImageService {
 
     });
   }
-  createImage(r: number, g: number, b: number){
+  createImage(r: number, g: number, b: number, h: number, l: number){
     if(r==g && r==b) this.pic.tipo = "P2"
     else this.pic.tipo = "P3"
-    let inicioPixels = 3;
-    this.pic.largura = 32;
-    this.pic.altura = 32;
-    this.pic.valMax = 256;
-    let tam = this.pic.largura * this.pic.altura;
+    this.pic.largura = h;
+    this.pic.altura = l;
+    this.pic.valMax = 255;
+    let tam = h*l;
     if(this.pic.tipo == 'P2') {
       let arrDados = Array(tam).fill(r)
       this.pic.pixels = this.loadPGM(arrDados, 0);
@@ -98,6 +97,16 @@ export class ImageService {
     return this.pic.largura;
   }
   public RGBtoHSL(r, g, b){
+    if(r == g && r == g && r>=255/3 && r<=2*255/3){
+      this.cor[0] = 0;
+      this.cor[1] = 0;
+      this.cor[2] = 0;
+    }
+    else{
+      this.cor[0] = 255-r;
+      this.cor[1] = 255-g;
+      this.cor[2] = 255-b;
+    }
     if(r>255 || g>255 || b>255){
       alert("nao funciona com valores maiores do que 255");
       return [0,0,0]
@@ -175,10 +184,88 @@ export class ImageService {
     let largura = this.pic.largura,index = y*largura+x
     index = y*largura+x
     if(this.pic.pixels[index] != undefined){
-      this.pic.pixels[index].r = this.cor
-      this.pic.pixels[index].g = this.cor
-      this.pic.pixels[index].b = this.cor
+      this.pic.pixels[index].r = this.cor[0]
+      this.pic.pixels[index].g = this.cor[1]
+      this.pic.pixels[index].b = this.cor[2]
     }
+    this.pictureStream.next(this.pic);
+  }
+  public drawLineEq(arrX: number[], arrY: number[]){
+    const largura = this.pic.largura, m = (arrY[1]-arrY[0])/(arrX[1]-arrX[0]), vX = arrX[1]-arrX[0], vY = arrY[1]-arrY[0];
+    if(arrX[0] == arrX[1]){
+      if(arrY[0]< arrY[1]){
+        for(let y = arrY[0]; y<arrY[1]; y++){
+          const index = y*largura+arrX[0];
+          this.pic.pixels[index].r = this.cor[0];
+          this.pic.pixels[index].g = this.cor[1];
+          this.pic.pixels[index].b = this.cor[2];
+        }
+      }else{
+        for(let y = arrY[1]; y<arrY[0]; y++){
+          const index = y*largura+arrX[0];
+          this.pic.pixels[index].r = this.cor[0];
+          this.pic.pixels[index].g = this.cor[1];
+          this.pic.pixels[index].b = this.cor[2];
+        }
+      }
+    }
+    else if(arrY[0] == arrY[1]){
+      if(arrX[0]< arrX[1]){
+        for(let x = arrX[0]; x<arrX[1]; x++){
+          const index = arrY[0]*largura+x;
+          this.pic.pixels[index].r = this.cor[0];
+          this.pic.pixels[index].g = this.cor[1];
+          this.pic.pixels[index].b = this.cor[2];
+        }
+      }else{
+        for(let x = arrX[1]; x<arrX[0]; x++){
+          const index = arrY[0]*largura+x;
+          this.pic.pixels[index].r = this.cor[0];
+          this.pic.pixels[index].g = this.cor[1];
+          this.pic.pixels[index].b = this.cor[2];
+        }
+      }
+    }
+    else if(vX>vY){
+      if(arrX[0]<arrX[1]){
+        for(let x = arrX[0]; x<arrX[1]; x++){
+          let y = Math.round(m*(x-arrX[1])+arrY[1]);
+          const index = y*largura+x;
+          this.pic.pixels[index].r = this.cor[0];
+          this.pic.pixels[index].g = this.cor[1];
+          this.pic.pixels[index].b = this.cor[2];
+        }
+      }else if(arrX[0]>arrX[1]){
+        for(let x = arrX[1]; x<arrX[0]; x++){
+          let y = Math.round(m*(x-arrX[1])+arrY[1]);
+          const index = y*largura+x;
+          this.pic.pixels[index].r = this.cor[0];
+          this.pic.pixels[index].g = this.cor[1];
+          this.pic.pixels[index].b = this.cor[2];
+        }
+      }
+    }else if(vX<vY){
+      if(arrY[0]<arrY[1]){
+        for(let y = arrY[0]; y<arrY[1]; y++){
+          let x = Math.round((y-arrY[0])/m+arrX[0]);
+          const index = y*largura+x;
+          console.log(index)
+          this.pic.pixels[index].r = this.cor[0];
+          this.pic.pixels[index].g = this.cor[1];
+          this.pic.pixels[index].b = this.cor[2];
+        }
+      }else if(arrX[0]>arrX[1]){
+        for(let y = arrY[1]; y<arrY[0]; y++){
+          let x = Math.round((y-arrY[0])/m+arrX[0]);
+          const index = y*largura+x;
+          console.log(index, x)
+          this.pic.pixels[index].r = this.cor[0];
+          this.pic.pixels[index].g = this.cor[1];
+          this.pic.pixels[index].b = this.cor[2];
+        }
+      }
+    }
+    
     this.pictureStream.next(this.pic);
   }
   public drawLinePar(arrX: number[], arrY: number[]){
@@ -186,43 +273,131 @@ export class ImageService {
     for(let t = 0; t<1; t+=0.01){
       const x = Math.floor(arrX[0]+vX*t), y = Math.floor(arrY[0]+vY*t);
       const index = y*largura+x;
-      this.pic.pixels[index].r = this.cor;
-      this.pic.pixels[index].g = this.cor;
-      this.pic.pixels[index].b = this.cor;
+      this.pic.pixels[index].r = this.cor[0];
+      this.pic.pixels[index].g = this.cor[1];
+      this.pic.pixels[index].b = this.cor[2];
     }
     this.pictureStream.next(this.pic);
+  }
+  public drawLineBres(arrX: number[], arrY: number[]){
+    let dX = arrX[1]-arrX[0], dY = arrY[1]-arrY[0];
+    if(Math.abs(dY) < Math.abs(dX)){
+      if(arrX[0] > arrX[1]) this.bresLow(arrX[1], arrY[1], arrX[0], arrY[0]); // 135º - 225º
+      else this.bresLow(arrX[0], arrY[0], arrX[1], arrY[1]); // 315º - 45º
+    }
+    else{
+      if(arrY[0] > arrY[1]) this.bresHigh(arrX[1], arrY[1], arrX[0], arrY[0]); // 45º - 135º
+      else this.bresHigh(arrX[0], arrY[0], arrX[1], arrY[1]); // 225º - 315º
+    }
+    const index = arrY[1]*this.pic.largura+arrX[1]
+    this.pic.pixels[index].r = this.cor[0];
+    this.pic.pixels[index].g = this.cor[1];
+    this.pic.pixels[index].b = this.cor[2];
+    this.pictureStream.next(this.pic);
+  }
+  private bresLow(x1: number, y1: number, x2: number, y2: number){ // desenha linhas com dY maior que dX
+    let dX = x2-x1, dY = y2-y1, incY = 1, y = y1;
+    const largura = this.pic.largura;
+    if(dY<0){
+      incY = -1;
+      dY = -dY
+    }
+    let d = (2 * dY) - dX;
+    for(let x = x1; x<x2; x++){
+      const index = y*largura+x
+      this.pic.pixels[index].r = this.cor[0];
+      this.pic.pixels[index].g = this.cor[1];
+      this.pic.pixels[index].b = this.cor[2];
+      if (d>0){
+        y = y + incY;
+        d = d + (2 * (dY - dX))
+      }
+      else d = d + 2 * dY
+    }
+  }
+  private bresHigh(x1: number, y1: number, x2: number, y2: number){ // desenha linhas com dX maior que o dY
+    let dX = x2-x1, dY = y2-y1, incX = 1, x = x1;
+    const largura = this.pic.largura;
+    if(dX<0){
+      incX = -1;
+      dX = -dX
+    }
+    let d = (2 * dX) - dY;
+    for(let y = y1; y<y2; y++){
+      const index = y*largura+x
+      this.pic.pixels[index].r = this.cor[0];
+      this.pic.pixels[index].g = this.cor[1];
+      this.pic.pixels[index].b = this.cor[2];
+      if (d>0){
+        x = x + incX;
+        d = d + (2 * (dX - dY))
+      }
+      else d = d + 2 * dX
+    }
   }
   public drawCircleEq(arrX: number[], arrY: number[]){ 
     const rad = Math.abs(arrX[0]-arrX[1]);
     const largura = this.pic.largura;
     for(let x = -rad; x<rad; x+=1){
       const y = Math.floor(Math.sqrt(rad*rad - x*x));
+      if(arrX[0]+x < 0 || arrX[0]+x > largura) continue;
+      // if(y>this.pic.altura || y<0) continue;
       let index = (arrY[0]+y)*largura+(arrX[0]+x);
       if(this.pic.pixels[index] != undefined){
-        this.pic.pixels[index].r = this.cor;
-        this.pic.pixels[index].g = this.cor;
-        this.pic.pixels[index].b = this.cor;
+        this.pic.pixels[index].r = this.cor[0];
+        this.pic.pixels[index].g = this.cor[1];
+        this.pic.pixels[index].b = this.cor[2];
       }
       index = (arrY[0]-y)*largura+(arrX[0]+x);
       if(this.pic.pixels[index] != undefined){
-        this.pic.pixels[index].r = this.cor;
-        this.pic.pixels[index].g = this.cor;
-        this.pic.pixels[index].b = this.cor;
+        this.pic.pixels[index].r = this.cor[0];
+        this.pic.pixels[index].g = this.cor[1];
+        this.pic.pixels[index].b = this.cor[2];
       }
     }
     this.pictureStream.next(this.pic);
   }
   public drawCirclePar(arrX: number[], arrY: number[]){
-    this.colorPoint(arrX[0], arrY[0])
     const pi = 3.14, rad = Math.abs(arrX[0]-arrX[1]), largura = this.pic.largura;
     for(let a = 0; a<2*pi; a+=0.01){
       let x = Math.round(rad * Math.cos(a));
       let y = Math.round(rad * Math.sin(a));
+      if(arrX[0]+x < 0 || arrX[0]+x > largura) continue;
       let index = (arrY[0]+y)*largura+(arrX[0]+x);
       if(this.pic.pixels[index] != undefined){
-        this.pic.pixels[index].r = this.cor;
-        this.pic.pixels[index].g = this.cor;
-        this.pic.pixels[index].b = this.cor;
+        this.pic.pixels[index].r = this.cor[0];
+        this.pic.pixels[index].g = this.cor[1];
+        this.pic.pixels[index].b = this.cor[2];
+      }
+    }
+    this.pictureStream.next(this.pic);
+  }
+  public drawCircleBres(arrX: number[], arrY: number[]){
+    let x = arrX[0], r = Math.abs(arrX[0]-arrX[1]), y =r, h = 1-r, de = 3, dse = -2*r+5;
+    const largura = this.pic.largura;
+    let index = y*largura+x
+    this.pic.pixels[index].r = this.cor[0];
+    this.pic.pixels[index].g = this.cor[1];
+    this.pic.pixels[index].b = this.cor[2];
+    console.log(x, y)
+    while(x<y){
+      if(h<0){
+        h = h+de;
+        de = de+2;
+        dse = dse+2
+      }
+      else{
+        h = h+dse;
+        de = de+2;
+        dse = dse+4;
+        y = y-1;
+      }
+      x = x+1
+      index = y*largura+x
+      if(this.pic.pixels[index] != undefined){
+        this.pic.pixels[index].r = this.cor[0];
+        this.pic.pixels[index].g = this.cor[1];
+        this.pic.pixels[index].b = this.cor[2];
       }
     }
     this.pictureStream.next(this.pic);

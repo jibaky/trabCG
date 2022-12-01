@@ -79,12 +79,11 @@ export class ImageVisualComponent implements OnInit {
     })
     this.myCanvas.nativeElement.addEventListener("mousedown", (e)=>{
       if(this.imageService.isLoaded){
-        if(this.drawService.currentTool == 0) this.drawExtra();
-        else this.defPrimCoord();
+        this.defPrimCoord();
       }
     })
     this.myCanvas.nativeElement.addEventListener("mouseup", (e)=>{
-      if(this.imageService.isLoaded) this.drawExtra();
+        this.drawExtra();
     })
   }
   defPrimCoord(){
