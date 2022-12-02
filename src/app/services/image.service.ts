@@ -336,8 +336,8 @@ export class ImageService {
     }
   }
   public drawCircleEq(arrX: number[], arrY: number[]){ 
-    const rad = Math.abs(arrX[0]-arrX[1]);
-    const largura = this.pic.largura;
+    const dX = arrX[1]-arrX[0], dY = arrY[1]-arrY[0], largura = this.pic.largura;
+    const rad = Math.round(Math.sqrt(dX*dX+dY*dY));
     for(let x = -rad; x<rad; x+=1){
       const y = Math.floor(Math.sqrt(rad*rad - x*x));
       if(arrX[0]+x < 0 || arrX[0]+x > largura) continue;
@@ -358,7 +358,8 @@ export class ImageService {
     this.pictureStream.next(this.pic);
   }
   public drawCirclePar(arrX: number[], arrY: number[]){
-    const pi = 3.14, rad = Math.abs(arrX[0]-arrX[1]), largura = this.pic.largura;
+    const dX = arrX[1]-arrX[0], dY = arrY[1]-arrY[0], largura = this.pic.largura;
+    const pi = 3.14, rad = Math.round(Math.sqrt(dX*dX+dY*dY));
     for(let a = 0; a<2*pi; a+=0.01){
       let x = Math.round(rad * Math.cos(a));
       let y = Math.round(rad * Math.sin(a));
@@ -373,13 +374,16 @@ export class ImageService {
     this.pictureStream.next(this.pic);
   }
   public drawCircleBres(arrX: number[], arrY: number[]){
-    let x = arrX[0], r = Math.abs(arrX[0]-arrX[1]), y =r, h = 1-r, de = 3, dse = -2*r+5;
-    const largura = this.pic.largura;
-    let index = y*largura+x
+    const centerX = Math.floor(this.pic.largura/2), centerY = Math.floor(this.pic.altura/2);
+    const dX = arrX[1]-arrX[0], dY = arrY[1]-arrY[0], largura = this.pic.largura;
+    const r = Math.round(Math.sqrt(dX*dX+dY*dY))
+    let x = 0, y=r, h = 1-r, de = 3, dse = -2*r+5, x1, y1, x2, y2;
+    let index = (y+centerY)*largura+(x+centerX)
     this.pic.pixels[index].r = this.cor[0];
     this.pic.pixels[index].g = this.cor[1];
     this.pic.pixels[index].b = this.cor[2];
-    console.log(x, y)
+    console.log(r);
+    let color = 20;
     while(x<y){
       if(h<0){
         h = h+de;
@@ -392,14 +396,99 @@ export class ImageService {
         dse = dse+4;
         y = y-1;
       }
-      x = x+1
-      index = y*largura+x
+
+      // x1 = x;
+      // y1 = y;
+      // for(let i = 0; i<8; i++){
+      //   index = (centerY+y1)*largura+(centerX+x1)
+      //   console.log(x1,y1);
+      //   if(this.pic.pixels[index] != undefined){
+      //   this.pic.pixels[index].r = this.cor[0];
+      //   this.pic.pixels[index].g = this.cor[1];
+      //   this.pic.pixels[index].b = this.cor[2];
+      //   }
+      //   x2 = x1;
+      //   y2 = y1;
+      //   x1 = Math.round(x2*0.70710678118-y2*0.70710678118)
+      //   y1 = Math.round(x2*0.70710678118+y2*0.70710678118)
+      // }
+
+    index = (centerY+y)*largura+(centerX+x) // vermelho
+    if(this.pic.pixels[index] != undefined){
+      this.pic.pixels[index].r = this.cor[0];
+      this.pic.pixels[index].g = this.cor[1];
+      this.pic.pixels[index].b = this.cor[2];
+      // this.pic.pixels[index].r = 255;
+      // this.pic.pixels[index].g = 0;
+      // this.pic.pixels[index].b = 0;
+    }
+    index = (centerY+x)*largura+(centerX-y) // azul
+    if(this.pic.pixels[index] != undefined){
+      this.pic.pixels[index].r = this.cor[0];
+      this.pic.pixels[index].g = this.cor[1];
+      this.pic.pixels[index].b = this.cor[2];
+      // this.pic.pixels[index].r = 0;
+      // this.pic.pixels[index].g = 0;
+      // this.pic.pixels[index].b = 255;
+    }
+    index = (centerY-y)*largura+(centerX-x); // verde
+    if(this.pic.pixels[index] != undefined){
+      this.pic.pixels[index].r = this.cor[0];
+      this.pic.pixels[index].g = this.cor[1];
+      this.pic.pixels[index].b = this.cor[2];
+      // this.pic.pixels[index].r = 0;
+      // this.pic.pixels[index].g = 255;
+      // this.pic.pixels[index].b = 0;
+    }
+    index = (centerY-x)*largura+(centerX+y); // branco
+    if(this.pic.pixels[index] != undefined){
+      this.pic.pixels[index].r = this.cor[0];
+      this.pic.pixels[index].g = this.cor[1];
+      this.pic.pixels[index].b = this.cor[2];
+      // this.pic.pixels[index].r = 255;
+      // this.pic.pixels[index].g = 255;
+      // this.pic.pixels[index].b = 255;
+    }
+
+      index = (centerY+y)+largura*(centerX+x) // preto
       if(this.pic.pixels[index] != undefined){
         this.pic.pixels[index].r = this.cor[0];
         this.pic.pixels[index].g = this.cor[1];
         this.pic.pixels[index].b = this.cor[2];
+        // this.pic.pixels[index].r = 0;
+        // this.pic.pixels[index].g = 0;
+        // this.pic.pixels[index].b = 0;
+      }  
+      index = (centerY-x)+largura*(centerX+y) // rosa
+      if(this.pic.pixels[index] != undefined){
+        this.pic.pixels[index].r = this.cor[0];
+        this.pic.pixels[index].g = this.cor[1];
+        this.pic.pixels[index].b = this.cor[2];
+        // this.pic.pixels[index].r = 255;
+        // this.pic.pixels[index].g = 0;
+        // this.pic.pixels[index].b = 255;
       }
+      index = (centerY-y)+largura*(centerX-x); // ciano
+      if(this.pic.pixels[index] != undefined){
+        this.pic.pixels[index].r = this.cor[0];
+        this.pic.pixels[index].g = this.cor[1];
+        this.pic.pixels[index].b = this.cor[2];
+        // this.pic.pixels[index].r = 0;
+        // this.pic.pixels[index].g = 255;
+        // this.pic.pixels[index].b = 255;
+      }
+      index = (centerY+x)+largura*(centerX-y); // amarelo
+      if(this.pic.pixels[index] != undefined){
+        this.pic.pixels[index].r = this.cor[0];
+        this.pic.pixels[index].g = this.cor[1];
+        this.pic.pixels[index].b = this.cor[2];
+        // this.pic.pixels[index].r = 255;
+        // this.pic.pixels[index].g = 255;
+        // this.pic.pixels[index].b = 0;
+      }
+      x = x+1
     }
+    
     this.pictureStream.next(this.pic);
   }
 }

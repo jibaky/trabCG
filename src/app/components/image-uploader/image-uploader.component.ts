@@ -16,8 +16,8 @@ export class ImageUploaderComponent implements OnInit {
   tR: any = 127;
   tG: any = 127;
   tB: any = 127;
-  tH: any = 32;
-  tL: any = 32;
+  tH: any = 100;
+  tL: any = 100;
   @ViewChild('draw') myCanvas: ElementRef;
 
   ngOnInit(): void {
