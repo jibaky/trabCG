@@ -1,3 +1,5 @@
+import { AnimationDriver } from '@angular/animations/browser';
+import { invalid } from '@angular/compiler/src/render3/view/util';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Imagem, Pixel } from '../models/image';
@@ -9,11 +11,20 @@ export class ImageService {
   public isLoaded: boolean = false;
   public cor = [0,0,0];
   private pic: Imagem = new Imagem();
+  private clipping: boolean = false;
+  private clippingX: number[];
+  private clippingY: number[];
   /** observable da imagem original */
   public originalStream = new BehaviorSubject(null);
   /** observable da imagem com alterações */
   public pictureStream = new BehaviorSubject(null);
   constructor() { }
+
+  public changeColor(r: number, g: number, b: number){
+    this.cor[0] = r;
+    this.cor[1] = g;
+    this.cor[2] = b;
+  }
 
   upload(arquivo: File): Promise<boolean>{
     return new Promise((resolve, reject)=>{
@@ -52,6 +63,7 @@ export class ImageService {
     });
   }
   createImage(r: number, g: number, b: number, h: number, l: number){
+    this.clipping = false;
     if(r==g && r==b) this.pic.tipo = "P2"
     else this.pic.tipo = "P3"
     this.pic.largura = h;
@@ -70,6 +82,16 @@ export class ImageService {
         arrDados.push(b);
       }
       this.pic.pixels = this.loadPPM(arrDados, 0);
+    }
+    for(let i = 0; i<l; i++){
+      for(let j = 0; j<h; j++){
+        const index = i*l+j;
+        if(i == 0 || j == 0 || i == l-1 || j == h-1){
+          this.pic.pixels[index].r = 0;
+          this.pic.pixels[index].g = 0;
+          this.pic.pixels[index].b = 0;
+        }
+      }
     }
     this.originalStream.next(this.pic);
     this.pictureStream.next(this.pic);
@@ -97,16 +119,6 @@ export class ImageService {
     return this.pic.largura;
   }
   public RGBtoHSL(r, g, b){
-    if(r == g && r == g && r>=255/3 && r<=2*255/3){
-      this.cor[0] = 0;
-      this.cor[1] = 0;
-      this.cor[2] = 0;
-    }
-    else{
-      this.cor[0] = 255-r;
-      this.cor[1] = 255-g;
-      this.cor[2] = 255-b;
-    }
     if(r>255 || g>255 || b>255){
       alert("nao funciona com valores maiores do que 255");
       return [0,0,0]
@@ -191,6 +203,12 @@ export class ImageService {
     this.pictureStream.next(this.pic);
   }
   public drawLineEq(arrX: number[], arrY: number[]){
+    if(this.clipping) {
+      let newArr = this.cohenSutherland(arrX, arrY);
+      arrX = newArr[0];
+      arrY = newArr[1];
+      if(arrX[0] == 0 && arrX[1] == 0 && arrY[0] == 0 && arrY[1] == 0 ) return;
+    }
     const largura = this.pic.largura, m = (arrY[1]-arrY[0])/(arrX[1]-arrX[0]), vX = arrX[1]-arrX[0], vY = arrY[1]-arrY[0];
     if(arrX[0] == arrX[1]){
       if(arrY[0]< arrY[1]){
@@ -249,7 +267,6 @@ export class ImageService {
         for(let y = arrY[0]; y<arrY[1]; y++){
           let x = Math.round((y-arrY[0])/m+arrX[0]);
           const index = y*largura+x;
-          console.log(index)
           this.pic.pixels[index].r = this.cor[0];
           this.pic.pixels[index].g = this.cor[1];
           this.pic.pixels[index].b = this.cor[2];
@@ -258,7 +275,6 @@ export class ImageService {
         for(let y = arrY[1]; y<arrY[0]; y++){
           let x = Math.round((y-arrY[0])/m+arrX[0]);
           const index = y*largura+x;
-          console.log(index, x)
           this.pic.pixels[index].r = this.cor[0];
           this.pic.pixels[index].g = this.cor[1];
           this.pic.pixels[index].b = this.cor[2];
@@ -269,6 +285,12 @@ export class ImageService {
     this.pictureStream.next(this.pic);
   }
   public drawLinePar(arrX: number[], arrY: number[]){
+    if(this.clipping) {
+      let newArr = this.cohenSutherland(arrX, arrY);
+      arrX = newArr[0];
+      arrY = newArr[1];
+      if(arrX[0] == 0 && arrX[1] == 0 && arrY[0] == 0 && arrY[1] == 0 ) return;
+    }
     const largura = this.pic.largura, vX = arrX[1]-arrX[0], vY = arrY[1]-arrY[0];
     for(let t = 0; t<1; t+=0.01){
       const x = Math.floor(arrX[0]+vX*t), y = Math.floor(arrY[0]+vY*t);
@@ -280,6 +302,12 @@ export class ImageService {
     this.pictureStream.next(this.pic);
   }
   public drawLineBres(arrX: number[], arrY: number[]){
+    if(this.clipping) {
+      let newArr = this.cohenSutherland(arrX, arrY);
+      arrX = newArr[0];
+      arrY = newArr[1];
+      if(arrX[0] == 0 && arrX[1] == 0 && arrY[0] == 0 && arrY[1] == 0 ) return;
+    }
     let dX = arrX[1]-arrX[0], dY = arrY[1]-arrY[0];
     if(Math.abs(dY) < Math.abs(dX)){
       if(arrX[0] > arrX[1]) this.bresLow(arrX[1], arrY[1], arrX[0], arrY[0]); // 135º - 225º
@@ -490,5 +518,175 @@ export class ImageService {
     }
     
     this.pictureStream.next(this.pic);
+  }
+
+  public defineClippingArea(arrX: number[], arrY: number[]){
+    const dX = arrX[1]-arrX[0], dY = arrY[1]-arrY[0], largura = this.pic.largura;
+    let xP: number, xG: number, yP: number, yG: number;
+    if(dX == 0 || dY == 0) return alert("area muito pequena");
+    if(arrX[1]>arrX[0]){
+      xP = arrX[0];
+      xG = arrX[1];
+    }
+    else{
+      xP = arrX[1];
+      xG = arrX[0];
+    }
+    if(arrY[1]>arrY[0]){
+      yP = arrY[0];
+      yG = arrY[1];
+    }
+    else{
+      yP = arrY[1];
+      yG = arrY[0];
+    }
+    this.clipping = true;
+    for(let i = xP; i<=xG; i++){
+      let index = yP*largura+i;
+      this.pic.pixels[index].r = 0;
+      this.pic.pixels[index].g = 0;
+      this.pic.pixels[index].b = 0;
+      index = yG*largura+i;
+      this.pic.pixels[index].r = 0;
+      this.pic.pixels[index].g = 0;
+      this.pic.pixels[index].b = 0;
+    }
+    for(let i = yP; i<=yG; i++){
+      let index = i*largura+xP;
+      this.pic.pixels[index].r = 0;
+      this.pic.pixels[index].g = 0;
+      this.pic.pixels[index].b = 0;
+      index = i*largura+xG;
+      this.pic.pixels[index].r = 0;
+      this.pic.pixels[index].g = 0;
+      this.pic.pixels[index].b = 0;
+    }
+    this.clippingX = [xP, xG];
+    this.clippingY = [yP, yG];
+    this.pictureStream.next(this.pic);
+  }
+
+  public cohenSutherland(arrX: number[], arrY: number[]){
+    let cod1 = [], cod2 = [];
+    if(arrY[0]<this.clippingY[0]) cod1.push(1)
+    else cod1.push(0);
+    if(arrY[1]<this.clippingY[0]) cod2.push(1)
+    else cod2.push(0);
+
+    if(arrY[0]>this.clippingY[1]) cod1.push(1)
+    else cod1.push(0);
+    if(arrY[1]>this.clippingY[1]) cod2.push(1)
+    else cod2.push(0);
+
+    if(arrX[0]>this.clippingX[1]) cod1.push(1)
+    else cod1.push(0);
+    if(arrX[1]>this.clippingX[1]) cod2.push(1)
+    else cod2.push(0);
+
+    if(arrX[0]<this.clippingX[0]) cod1.push(1)
+    else cod1.push(0);
+    if(arrX[1]<this.clippingX[0]) cod2.push(1)
+    else cod2.push(0);
+    
+    let contOut = 0, contInside = 0, and = [];
+    let cont1 = 0, cont2 = 0;
+    for(let i = 0; i<cod1.length; i++){
+      if(cod1[i] == 1 && cod2[i] == 1 && cod1[i] == cod2[i]) and.push(1);
+      else and.push(0);
+      if(cod1[i] == cod2[i]) contInside++;
+      if(and[i] == 0) contOut++;
+      if(cod1[i] == 1) cont1++
+      if(cod2[i] == 1) cont2++
+    }
+    if(contInside == 4) return [arrX, arrY];
+    else if(contOut != 4) {
+      arrX = [0,0];
+      arrY = [0,0];
+      return [arrX, arrY];
+    }
+
+    let m = (arrY[1]-arrY[0])/(arrX[1]-arrX[0])
+    let x1 = 0, y1 = 0, x2 = 0, y2 = 0, x3 = 0, y3 = 0, x4 = 0, y4 = 0;
+    
+    if(cont1 != 0){
+      console.log('cod1')
+      y1 = this.clippingY[0]; // cima
+      x1 = Math.round((y1-arrY[0])/m+arrX[0]);
+
+      y2 = this.clippingY[1]; // baixo
+      x2 = Math.round((y2-arrY[0])/m+arrX[0]);
+
+      x3 = this.clippingX[1]; // direita
+      y3 = Math.round(m*(x3-arrX[0])+arrY[0]);
+
+      x4 = this.clippingX[0]; // esquerda
+      y4 = Math.round(m*(x4-arrX[0])+arrY[0]);
+      // console.log(x1,y1, x2,y2, x3,y3, x4,y4);
+
+      if(x1 > this.clippingX[0] && x1 < this.clippingX[1] && cod1[0] == 1){
+        console.log('1 - 0')
+        arrX[0] = x1;
+        arrY[0] = y1;
+      }
+      else if(x2 > this.clippingX[0] && x2 < this.clippingX[1] && cod1[1] == 1){
+        console.log('1 - 1')
+        arrX[0] = x2;
+        arrY[0] = y2;
+      }
+      else if(y3 > this.clippingY[0] && y3 < this.clippingY[1] && cod1[2] == 1){
+        console.log('1 - 2')
+        arrX[0] = x3;
+        arrY[0] = y3;
+      }
+      else if(y4 > this.clippingY[0] && y4 < this.clippingY[1] && cod1[3] == 1){
+        console.log('1 - 3')
+        arrX[0] = x4;
+        arrY[0] = y4;
+      }
+    }
+
+    x1 = 0, y1 = 0, x2 = 0, y2 = 0, x3 = 0, y3 = 0, x4 = 0, y4 = 0;
+    
+    console.log(cod1, cont1, cod2, cont2)
+    console.log(arrX, arrY)
+    console.log(this.clippingX, this.clippingY)
+
+    if(cont2 != 0){
+      console.log('cod2')
+      y1 = this.clippingY[0]; // cima
+      x1 = Math.round((y1-arrY[0])/m+arrX[1]);
+
+      y2 = this.clippingY[1]; // baixo
+      x2 = Math.round((y2-arrY[0])/m+arrX[1]);
+
+      x3 = this.clippingX[1]; // direita
+      y3 = Math.round(m*(x3-arrX[0])+arrY[1]);
+
+      x4 = this.clippingX[0]; // esquerda
+      y4 = Math.round(m*(x4-arrX[0])+arrY[1]);
+      console.log(x1,y1, x2,y2, x3,y3, x4,y4);
+      if(x1 > this.clippingX[0] && x1 < this.clippingX[1] && cod2[0] == 1){
+        console.log('2 - 0')
+        arrX[1] = x1;
+        arrY[1] = y1;
+      }
+      else if(x2 > this.clippingX[0] && x2 < this.clippingX[1] && cod2[1] == 1){
+        console.log('2 - 1')
+        arrX[1] = x2;
+        arrY[1] = y2;
+      }
+      else if(y3 > this.clippingY[0] && y3 < this.clippingY[1] && cod2[2] == 1){
+        console.log('2 - 2')
+        arrX[1] = x3;
+        arrY[1] = y3;
+      }
+      else if(y4 > this.clippingY[0] && y4 < this.clippingY[1] && cod2[3] == 1){
+        console.log('2 - 3')
+        arrX[1] = x4;
+        arrY[1] = y4;
+      }
+    }
+    console.log(arrX, arrY)
+    return [arrX, arrY];
   }
 }

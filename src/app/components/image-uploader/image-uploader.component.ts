@@ -13,9 +13,9 @@ export class ImageUploaderComponent implements OnInit {
 
   constructor(public imageService: ImageService, public drawService: DrawService) { }
   
-  tR: any = 127;
-  tG: any = 127;
-  tB: any = 127;
+  tR: any = 0;
+  tG: any = 0;
+  tB: any = 0;
   tH: any = 100;
   tL: any = 100;
   @ViewChild('draw') myCanvas: ElementRef;
@@ -43,7 +43,11 @@ export class ImageUploaderComponent implements OnInit {
       this.drawOnCanvas(updatedPicture);
     });
   }
-  createNewPic(r:string, g:string, b:string, h:string, l:string): void{
+  changeColor(r: any, g: any, b: any){
+    let nR = Number(r), nG = Number(g), nB = Number(b);
+    this.imageService.changeColor(nR, nG, nB);
+  }
+  createNewPic(r: any, g: any, b: any, h: any, l: any): void{
     let nR = Number(r), nG = Number(g), nB = Number(b), nH = Number(h), nL = Number(l);
     if(nR>255 || nG>255 || nB>255){
       alert("as cores RGB só vão até 255");
