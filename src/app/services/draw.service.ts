@@ -24,6 +24,8 @@ export class DrawService {
       this.imageService.drawCirclePar(arrX, arrY);
     } else if (this.currentTool == 6) {
       this.imageService.drawCircleBres(arrX, arrY);
+    }else if (this.currentTool == 7) {
+      this.imageService.defineClippingArea(arrX, arrY);
     }
   }
 }

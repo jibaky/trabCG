@@ -1,20 +1,22 @@
 <div class = "flex">
     <div>
         <p>NOVA IMAGEM</p>
-    <div>
-        <p>ALTURA E LARGURA</p>
-        <input id="H" size="1" [(value)]="tH" #textH>
-        <input id="L" size="1" [(value)]="tL" #textL>
-    </div>
-    <div>
-        <p>R G B</p>
-        <input id="R" size="1" [(value)]="tR" #textR>
-        <input id="G" size="1" [(value)]="tG" #textG>
-        <input id="B" size="1" [(value)]="tB" #textB>
-    </div>
+        <div>
+            <p>ALTURA E LARGURA</p>
+            <input id="H" size="1" [(value)]="tH" #textH>
+            <input id="L" size="1" [(value)]="tL" #textL>
+        </div>
+        <div>
+            <p>COR DA LINHA</p>
+            <p>R G B</p>
+            <input id="R" size="1" [(value)]="tR" #textR>
+            <input id="G" size="1" [(value)]="tG" #textG>
+            <input id="B" size="1" [(value)]="tB" #textB> <br>
+            <button mat-raised-button color="primary" (click)="changeColor(textR.value, textG.value, textB.value)">trocar cor</button>
+        </div>
     </div>
     <br>
-    <button mat-raised-button color="primary" (click)="createNewPic(textR.value,textG.value,textB.value,textH.value,textL.value)">nova Imagem</button>
+    <button mat-raised-button color="primary" (click)="createNewPic(255, 255, 255, textH.value, textL.value)">nova Imagem</button>
     <canvas id='draw' #draw width='150'  class='aspero oculto'></canvas><br>
     <input type='file' class='oculto' name='file' (change)='onChange(fileInput.files[0])' display="none" #fileInput>
     <button (click)="fileInput.value = '';fileInput.click()" mat-raised-button color="primary"> Abrir Arquivo </button>
