@@ -287,7 +287,18 @@ export class ProjectionsComponent implements OnInit {
     let deltaY = maxY - minY;
     let deltaZ = maxZ - minZ;
 
-    const center3D = new Coord3D(deltaX / 2, deltaY / 2, deltaZ / 2);
+    let points = this.getAllPoints()
+    let somaX = 0, somaY = 0, somaZ = 0;
+    for(let i = 0; i<points.length; i++){
+      somaX += points[i].x;
+      somaY += points[i].y;
+      somaZ += points[i].z;
+    }
+    let mediaX = somaX/points.length
+    let mediaY = somaX/points.length
+    let mediaZ = somaX/points.length
+
+    const center3D = new Coord3D(mediaX, mediaY, mediaZ);
     t[3][0] = -center3D.x;
     t[3][1] = center3D.y;
     t[3][2] = -center3D.z;
@@ -328,10 +339,25 @@ export class ProjectionsComponent implements OnInit {
       [1, 0, 0, 0],
       [0, 1, 0, 0],
       [0, 0, 1, 0],
-      [deltaX / 2, -(deltaY / 2), deltaZ / 2, 1],
+      [mediaX, -mediaY, mediaZ, 1],
     ];
 
     this.apply(tRerversa);
+  }
+
+  getAllPoints(){
+    let arr = [], aux1, aux2;
+    for(const lines of this.casa.lines){
+      aux1 = 0
+      aux2 = 0
+      for(let item of arr){
+        if(lines.start.x == item.x && lines.start.y == item.y && lines.start.z == item.z) aux1++;
+        if(lines.end.x == item.x && lines.end.y == item.y && lines.end.z == item.z) aux2++;
+      }
+      if(aux1 == 0) arr.push(lines.start)
+      if(aux2 == 0) arr.push(lines.end)
+    }
+    return arr;
   }
 
   getShearingMatrix(): number[][] {
