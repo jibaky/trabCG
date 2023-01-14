@@ -1,23 +1,21 @@
 <div class = "flex">
-    <div>
-        <p>NOVA IMAGEM</p>
+    <div style="margin-left: 2px;">
         <div>
-            <p>ALTURA E LARGURA</p>
+            <p>ALTURA E LARGURA DO RESET</p>
             <input id="H" size="1" [(value)]="tH" #textH>
             <input id="L" size="1" [(value)]="tL" #textL>
+            <button mat-raised-button color="accent" style="margin: 4px; width: 180px; height: 36px;" (click)="createNewPic(255, 255, 255, textH.value, textL.value)">Resetar Imagem</button>
         </div>
-        <div>
+        <div style="margin-left: 2px;">
             <p>COR DA LINHA</p>
-            <p>R G B</p>
+            <span>R G B  </span>
             <input id="R" size="1" [(value)]="tR" #textR>
             <input id="G" size="1" [(value)]="tG" #textG>
-            <input id="B" size="1" [(value)]="tB" #textB> <br>
-            <button mat-raised-button color="primary" (click)="changeColor(textR.value, textG.value, textB.value)">trocar cor</button>
+            <input id="B" size="1" [(value)]="tB" #textB>
+            <button mat-raised-button color="primary" style="margin: 4px; width: 137px;" (click)="changeColor(textR.value, textG.value, textB.value)">trocar cor</button>
         </div>
+        <button (click)="fileInput.value = '';fileInput.click()" mat-raised-button color="accent" style="margin: 4px; width: 180px; height: 36px;"> Abrir Imagem </button>
+        <input type='file' class='oculto' name='file' (change)='onChange(fileInput.files[0])' display="none" #fileInput>
     </div>
-    <br>
-    <button mat-raised-button color="primary" (click)="createNewPic(255, 255, 255, textH.value, textL.value)">nova Imagem</button>
-    <canvas id='draw' #draw width='150'  class='aspero oculto'></canvas><br>
-    <input type='file' class='oculto' name='file' (change)='onChange(fileInput.files[0])' display="none" #fileInput>
-    <button (click)="fileInput.value = '';fileInput.click()" mat-raised-button color="primary"> Abrir Arquivo </button>
+    <canvas id='draw' #draw width='150'  class='aspero oculto'></canvas>
 </div>

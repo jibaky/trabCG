@@ -1,37 +1,12 @@
 <app-image-uploader></app-image-uploader>
-<mat-button-toggle-group #group="matButtonToggleGroup" (change)="drawService.currentTool = group.value">
-  <mat-button-toggle value="0" aria-label="Text align left">
-    <!-- <mat-icon class="outlined">edit</mat-icon> -->
-    draw point
-  </mat-button-toggle>
-  <mat-button-toggle value="7" aria-label="Text align right">
-    <!-- <mat-icon class="outlined">circle</mat-icon> -->
-    cohen-sutherland
-  </mat-button-toggle>
-  <mat-button-toggle value="3" aria-label="Text align center">
-    <!-- <mat-icon class="outlined">horizontal_rule</mat-icon> -->
-    draw line - bresenham
-  </mat-button-toggle>
-  <mat-button-toggle value="1" aria-label="Text align center">
-    <!-- <mat-icon class="outlined">horizontal_rule</mat-icon> -->
-    draw line - equation
-  </mat-button-toggle>
-  <mat-button-toggle value="2" aria-label="Text align center">
-    <!-- <mat-icon class="outlined">horizontal_rule</mat-icon> -->
-    draw line - parameter
-  </mat-button-toggle>
-  
-  <mat-button-toggle value="4" aria-label="Text align right">
-    <!-- <mat-icon class="outlined">circle</mat-icon> -->
-    draw circle - equation
-  </mat-button-toggle>
-  <mat-button-toggle value="5" aria-label="Text align right">
-    <!-- <mat-icon class="outlined">circle</mat-icon> -->
-    draw circle - parameter
-  </mat-button-toggle>
-  <mat-button-toggle value="6" aria-label="Text align right">
-    <!-- <mat-icon class="outlined">circle</mat-icon> -->
-    draw circle - bresenham
-  </mat-button-toggle>
-</mat-button-toggle-group> <br> 
+<button mat-raised-button style="margin: 4px; width: 180px;" color="primary" (click)="drawService.changeCurrentTool(0)">draw point</button>
+<button mat-raised-button style="margin: 4px; width: 180px;" color="primary" (click)="drawService.changeCurrentTool(1)">draw line - equation</button>
+<button mat-raised-button style="margin: 4px; width: 180px;" color="primary" (click)="drawService.changeCurrentTool(2)">draw line - parameter</button>
+<button mat-raised-button style="margin: 4px; width: 180px;" color="primary" (click)="drawService.changeCurrentTool(3)">draw line - bresenham</button>
+<button mat-raised-button style="margin: 4px; width: 180px;" color="primary" (click)="drawService.changeCurrentTool(4)">draw circle - equation</button><br>
+<button mat-raised-button style="margin: 4px; width: 180px;" color="primary" (click)="drawService.changeCurrentTool(5)">draw circle - parameter</button>
+<button mat-raised-button style="margin: 4px; width: 180px;" color="primary" (click)="drawService.changeCurrentTool(6)">draw circle - bresenham</button>
+<button mat-raised-button style="margin: 4px; width: 180px;" color="primary" (click)="drawService.changeCurrentTool(7)">cohen-sutherland</button>
+<button mat-raised-button style="margin: 4px; width: 180px;" color="primary" (click)="drawService.changeCurrentTool(8)">flood fill 4</button>
+<button mat-raised-button style="margin: 4px; width: 180px;" color="primary" (click)="drawService.changeCurrentTool(9)">flood fill 8</button><br>
 <app-image-visual></app-image-visual>

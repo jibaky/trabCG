@@ -37,6 +37,7 @@ export class ImageUploaderComponent implements OnInit {
     }
   }
   ngAfterViewInit(): void {
+    this.createNewPic(255, 255, 255, this.tH, this.tL);
     this.imageService.originalStream.pipe(
       filter((v)=> v != null)      
     ).subscribe((updatedPicture: Imagem)=>{

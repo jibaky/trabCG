@@ -9,6 +9,10 @@ export class DrawService {
 
   public currentTool = 0;
 
+  changeCurrentTool(tool: number):void {
+    this.currentTool = tool;
+  }
+
   draw(arrX = [], arrY = []) {
     if (this.currentTool == 0) {
       this.imageService.colorPoint(arrX[1], arrY[1]);
@@ -26,6 +30,10 @@ export class DrawService {
       this.imageService.drawCircleBres(arrX, arrY);
     }else if (this.currentTool == 7) {
       this.imageService.defineClippingArea(arrX, arrY);
+    }else if (this.currentTool == 8) {
+      this.imageService.floodFill4(arrX[1], arrY[1]);
+    }else if (this.currentTool == 9) {
+      this.imageService.floodFill8(arrX[1], arrY[1]);
     }
   }
 }

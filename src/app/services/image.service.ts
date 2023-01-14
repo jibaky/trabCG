@@ -192,7 +192,7 @@ export class ImageService {
     }
     this.pictureStream.next(this.pic);
   }
-  public colorPoint(x, y){
+  public colorPoint(x, y, disableRendering = false){
     let largura = this.pic.largura,index = y*largura+x
     index = y*largura+x
     if(this.pic.pixels[index] != undefined){
@@ -200,7 +200,7 @@ export class ImageService {
       this.pic.pixels[index].g = this.cor[1]
       this.pic.pixels[index].b = this.cor[2]
     }
-    this.pictureStream.next(this.pic);
+    if(disableRendering == false) this.pictureStream.next(this.pic);
   }
   public drawLineEq(arrX: number[], arrY: number[]){
     if(this.clipping) {
@@ -688,5 +688,89 @@ export class ImageService {
     }
     console.log(arrX, arrY)
     return [arrX, arrY];
+  }
+  private checkValidityFloodFill(x: number, y:number, color: number[], colored: number[], stack: number[]): boolean{
+    if(x < 0) return false;
+    if(x >= this.pic.largura) return false;
+    if(y < 0) return false;
+    if(y >= this.pic.altura) return false;
+    const index = y*this.pic.largura+x;
+    if(this.pic.pixels[index].r != color[0] &&
+       this.pic.pixels[index].g != color[1] &&
+       this.pic.pixels[index].b != color[2]) return false;
+    if(this.pic.pixels[index].r == this.cor[0] && 
+       this.pic.pixels[index].g == this.cor[1] &&
+       this.pic.pixels[index].b == this.cor[2]) return false;
+    if(colored.includes(index)) return false
+    if(stack.includes(index)) return false;
+    return true
+  }
+
+  public floodFill4(x: number, y:number): void{
+    let index = y*this.pic.largura+x;
+    const largura = this.pic.largura, color = [this.pic.pixels[index].r, this.pic.pixels[index].g, this.pic.pixels[index].b];
+    if(color[0] == this.cor[0] && color[1] == this.cor[1] && color[2] == this.cor[2]) return;
+    let stack1 = [];
+    let stack2 = []
+    let colored = [];
+    stack1.push([x,y])
+    stack2.push(y*largura+x)
+    while(stack1.length != 0){
+      const coord = stack1.shift()
+      stack2.shift()
+      x = coord[0];
+      y = coord[1];
+      index = y*largura+x;
+      colored.push(index);
+      this.colorPoint(x, y, true);
+      if(this.checkValidityFloodFill(x,y-1,color, colored, stack2)){
+        stack1.push([x,y-1]);
+        stack2.push((y-1)*largura+x)
+      }
+      if(this.checkValidityFloodFill(x-1,y,color, colored, stack2)){
+        stack1.push([x-1,y]);
+        stack2.push(y*largura+(x-1))
+      }
+      if(this.checkValidityFloodFill(x+1,y,color, colored, stack2)){
+        stack1.push([x+1,y]);
+        stack2.push(y*largura+(x+1))
+      }
+      if(this.checkValidityFloodFill(x,y+1,color, colored, stack2)){
+        stack1.push([x,y+1]);
+        stack2.push((y+1)*largura+x)
+      }
+    }
+    this.pictureStream.next(this.pic);
+    return;
+  }
+
+  public floodFill8(x: number, y:number): void{
+    let index = y*this.pic.largura+x;
+    const largura = this.pic.largura, color = [this.pic.pixels[index].r, this.pic.pixels[index].g, this.pic.pixels[index].b];
+    if(color[0] == this.cor[0] && color[1] == this.cor[1] && color[2] == this.cor[2]) return;
+    let stack1 = [];
+    let stack2 = [];
+    let colored = [];
+    stack1.push([x,y])
+    stack2.push(y*largura+x)
+    while(stack1.length != 0){
+      const coord = stack1.shift()
+      stack2.shift()
+      x = coord[0];
+      y = coord[1];
+      index = y*largura+x;
+      colored.push(index);
+      this.colorPoint(x, y, true)
+      for(let i = -1; i<2; i++){
+        for(let j = -1; j<2; j++){
+          if(this.checkValidityFloodFill(x+j,y+i,color, colored, stack2)){
+            stack1.push([x+j,y+i]);
+            stack2.push((y+i)*largura+(x+j))
+          }
+        }
+      }
+    }
+    this.pictureStream.next(this.pic);
+    return;
   }
 }
